@@ -9,17 +9,7 @@ import GlobalStyle from '@/app/styles/globalStyles';
 import { theme } from '@/app/styles/thems';
 
 export default function App({ Component, pageProps }: AppProps) {
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            staleTime: Infinity,
-            // staleTime: 0,
-          },
-        },
-      })
-  );
+  const [queryClient] = useState(() => new QueryClient());
 
   return (
     <QueryClientProvider client={queryClient}>

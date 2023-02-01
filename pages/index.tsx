@@ -8,53 +8,51 @@ import {
 } from 'react-query';
 
 import { Cards } from '@/widgets/Cards';
-import { fetchPosts, usePosts } from 'src/pages/hooks/usePosts';
+
+import { fetchTodoList } from 'src/pages/hooks/useTodoList';
+import apiHelper from '@/app/api/apiHelper';
 
 const HomePage: NextPage = () => {
-  const { data, isLoading, isFetching } = usePosts();
+  const queryClient = useQueryClient();
 
-  // console.log('isLoading', isLoading);
-  // console.log('isFetching', isFetching);
-
-  // console.log('isFetching', isFetching);
-
-  // const queryClient = useQueryClient();
-
-  // const addComment = useMutation(
-  //   (newTodo) => axios.post('/api/data', { text: newTodo }),
-  //   {
-  //     onMutate: () => {
-  //       console.log('sdfsfsdf');
-  //     },
-  //     onSuccess: () => {
-  //       console.log('update');
-  //       queryClient.invalidateQueries({ queryKey: 'posts' });
-  //     },
-  //   }
-  // );
+  const mutation = useMutation({
+    mutationFn: (newTodo: { id: number; name: string; count: number }) => {
+      return apiHelper.post('/todos', newTodo);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries('todoList');
+    },
+  });
 
   return (
     <>
       <p>HomePage</p>
-      <p>{data[0].title}</p>
-      <button>asdadadad</button>
+      <button
+        onClick={() => {
+          mutation.mutate({
+            id: 0,
+            name: 'New Name',
+            count: 1,
+          });
+        }}
+      >
+        asdadadad
+      </button>
       <Cards link={'/about'} name={'About Page'} />
     </>
   );
 };
 
 export async function getStaticProps() {
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        enabled: false,
+      },
+    },
+  });
 
-  // const queryClient = new QueryClient({
-  //   defaultOptions: {
-  //     queries: {
-  //       staleTime: Infinity,
-  //     },
-  //   },
-  // });
-
-  await queryClient.prefetchQuery('posts', fetchPosts, { staleTime: 0 });
+  await queryClient.prefetchQuery('todoList', fetchTodoList);
 
   return {
     props: {
